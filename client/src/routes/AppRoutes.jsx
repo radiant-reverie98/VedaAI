@@ -12,6 +12,7 @@ import CreateAssignment from '../components/dashboard/CreateAssignment'
 import { LogIn } from 'lucide-react'
 import Login from '../pages/Login'
 import Register from '../pages/Register'
+import AssignmentDetails from '../components/dashboard/AssignmentDetails'
 
 function AppRoutes() {
   return (
@@ -25,6 +26,7 @@ function AppRoutes() {
         <Route path="library" element={<Library />} />
         <Route path="my-groups" element={<MyGroups />} />
         <Route path="create-assignment" element={<CreateAssignment/>}/>
+        <Route path="assignment/:assignmentId" element={<AssignmentDetails />} />
 
 
       </Route>

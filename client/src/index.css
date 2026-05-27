@@ -1,1 +1,65 @@
 @import "tailwindcss";
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom AI Platform Keyframe Animations */
+@layer utilities {
+  
+  /* Infinite sliding loader bar for the AI Generating State */
+  .animate-infinite-loading {
+    animation: infinite-shimmer 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  /* Fade-in animation when switching router page paths */
+  .animate-fade-in {
+    animation: interface-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes infinite-shimmer {
+  0% {
+    transform: translateX(-100%) scaleX(0.2);
+    transform-origin: left;
+  }
+  50% {
+    transform: translateX(-20%) scaleX(0.6);
+    transform-origin: left;
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.2);
+    transform-origin: left;
+  }
+}
+
+@keyframes interface-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optional premium dark theme custom scrollbar layout */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0F19;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F2937;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #374151;
+}

@@ -33,7 +33,6 @@ const assignmentSchema = new mongoose.Schema(
             "short",
             "long",
             "numerical",
-            "graph",
           ],
           required: true,
         },
@@ -69,7 +68,10 @@ const assignmentSchema = new mongoose.Schema(
         explanation: String,
       },
     ],
-
+    dueDate: {
+      type: Date,
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "generating", "completed", "failed"],

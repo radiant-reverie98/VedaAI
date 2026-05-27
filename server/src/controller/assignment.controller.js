@@ -14,10 +14,11 @@ export const createAssignment = async (req, res) => {
       subject,
       description,
       questionConfig,
+      dueDate
     } = req.body;
 
     // 1. Validate required fields
-    if (!title || !subject || !questionConfig) {
+    if (!title || !subject || !questionConfig || !dueDate) {
       return res.status(400).json({
         success: false,
         message: "title, subject, and questionConfig are required",
@@ -93,6 +94,7 @@ export const createAssignment = async (req, res) => {
       extractedText,
       questionConfig: parsedQuestionConfig,
       teacherId: req.userId,
+      dueDate,
     });
 
     return res.status(201).json({
@@ -222,83 +224,120 @@ export const deleteAssignment = async (req, res) => {
 };
 
 export const generateAssessment = async (req, res) => {
+
   try {
 
     const { assignmentId } = req.params;
 
-    // Find assignment belonging to logged in teacher
+    // 1. Find assignment
     const assignment = await Assignment.findOne({
       _id: assignmentId,
       teacherId: req.userId,
     });
 
     if (!assignment) {
+
       return res.status(404).json({
         success: false,
         message: "Assignment not found",
       });
+
     }
 
-    // Prevent duplicate generation
+    // 2. Prevent duplicate generation
     if (assignment.status === "generating") {
+
       return res.status(400).json({
         success: false,
-        message: "Assessment generation already in progress",
+        message:
+          "Assessment generation already in progress",
       });
+
     }
 
-    // Update status to generating
+    // 3. Prevent regeneration
+    if (assignment.status === "completed") {
+
+      return res.status(400).json({
+        success: false,
+        message:
+          "Assessment already generated",
+      });
+
+    }
+
+    // 4. Update status
     assignment.status = "generating";
 
     await assignment.save();
 
-    // Generate questions using AI
-    const aiResponse = await generateQuestionsWithAI({
-      extractedText: assignment.extractedText,
-      questionConfig: assignment.questionConfig,
-    });
-
-    let parsedQuestions;
-
     try {
 
-      // Remove markdown wrapping if Gemini adds it
-      const cleanedResponse = aiResponse
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
+      // 5. Generate AI Questions
+      const generatedQuestions =
+        await generateQuestionsWithAI({
+          extractedText: assignment.extractedText,
+          questionConfig: assignment.questionConfig,
+        });
 
-      parsedQuestions = JSON.parse(cleanedResponse);
+      // 6. Validate AI response
+      if (!Array.isArray(generatedQuestions)) {
+
+        assignment.status = "failed";
+
+        assignment.generationError =
+          "AI did not return valid array";
+
+        await assignment.save();
+
+        return res.status(500).json({
+          success: false,
+          message:
+            "Invalid AI response format",
+        });
+
+      }
+
+      // 7. Save generated questions
+      assignment.generatedQuestions =
+        generatedQuestions;
+
+      assignment.status = "completed";
+
+      assignment.generationError = "";
+
+      await assignment.save();
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Assessment generated successfully",
+        generatedQuestions,
+      });
 
     } catch (error) {
 
       assignment.status = "failed";
 
+      assignment.generationError =
+        error.message;
+
       await assignment.save();
 
       return res.status(500).json({
         success: false,
-        message: "Failed to parse AI response",
+        message:
+          "Failed to generate assessment",
       });
 
     }
 
-    // Save generated questions
-    assignment.generatedQuestions = parsedQuestions;
-
-    assignment.status = "completed";
-
-    await assignment.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Assessment generated successfully",
-      generatedQuestions: parsedQuestions,
-    });
-
   } catch (error) {
 
-    console.log("generateAssessment error:", error);
+    console.log(
+      "generateAssessment error:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
@@ -306,4 +345,5 @@ export const generateAssessment = async (req, res) => {
     });
 
   }
+
 };
