@@ -8,7 +8,21 @@ export const registerUser = async (req, res) => {
 
     try {
 
-        const { name, email, password } = req.body;
+        const {
+            name,
+            email,
+            password,
+            schoolName
+        } = req.body;
+
+
+        // Validation
+        if (!name || !email || !password || !schoolName) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
 
 
         // Check Existing User
@@ -20,12 +34,16 @@ export const registerUser = async (req, res) => {
                 message: "User already exists",
             });
         }
-        if(password.length < 8){
+
+
+        // Password Validation
+        if (password.length < 8) {
             return res.status(400).json({
                 success: false,
                 message: "Password must be atleast 8 characters long"
-            })
+            });
         }
+
 
         // Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,6 +54,7 @@ export const registerUser = async (req, res) => {
             name,
             email,
             password: hashedPassword,
+            schoolName,
         });
 
 
@@ -54,12 +73,13 @@ export const registerUser = async (req, res) => {
         // Set Cookie
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // true in production
+            secure: false,
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
 
+        // Response
         res.status(201).json({
             success: true,
             message: "User registered successfully",
@@ -67,6 +87,7 @@ export const registerUser = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
+                schoolName: user.schoolName,
             },
         });
 
@@ -87,7 +108,7 @@ export const loginUser = async (req, res) => {
 
         // Request Body
         const { email, password } = req.body;
-
+        console.log(req.body)
 
         // Check User
         const user = await User.findOne({ email });
@@ -105,7 +126,7 @@ export const loginUser = async (req, res) => {
             password,
             user.password
         );
-
+        console.log(`Password match`,isPasswordMatched)
         if (!isPasswordMatched) {
             return res.status(400).json({
                 success: false,
@@ -149,6 +170,33 @@ export const loginUser = async (req, res) => {
     } catch (error) {
 
         res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+export const logoutUser = async (req, res) => {
+
+    try {
+
+        res.cookie("token", "", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            expires: new Date(0),
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful",
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
             success: false,
             message: error.message,
         });

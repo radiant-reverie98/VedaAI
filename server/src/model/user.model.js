@@ -21,6 +21,12 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+
+    schoolName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
   {
     timestamps: true,

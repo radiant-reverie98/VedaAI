@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
   Users, 
@@ -10,9 +10,21 @@ import {
   LogOut, 
   Plus 
 } from 'lucide-react';
-
+import api from '../api.js';
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate()
+  const handleLogout = async()=>{
+    try{
+      const response = await api.post(`/auth/logout`)
+      if(response.data.success){
+        navigate('/')
+      }
+    }
+    catch(error){
+      console.log(error)
+    }
+  }
 
   // Helper function to check if a route is active to clean up JSX clutter
   const isActive = (path) => location.pathname === path;
@@ -143,7 +155,7 @@ export default function Sidebar() {
           {/* Logout Option on Hover/Click */}
           <div className="absolute bottom-full left-0 w-full mb-2 bg-white border border-gray-200 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-1">
             <button 
-              onClick={() => console.log('Logging out...')} 
+              onClick={handleLogout} 
               className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
             >
               <LogOut size={16} />

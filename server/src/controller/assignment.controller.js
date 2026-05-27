@@ -1,5 +1,5 @@
 import Assignment from "../model/assignment.model.js";
-
+import { generateQuestionsWithAI } from "../services/ai.services.js";
 import { uploadToCloudinary } from "../utils/cloudinary.utils.js";
 import { extractPdfText } from "../utils/extractedPdfText.js";
 
@@ -212,6 +212,93 @@ export const deleteAssignment = async (req, res) => {
   } catch (error) {
 
     console.log("Delete Assignment Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+
+  }
+};
+
+export const generateAssessment = async (req, res) => {
+  try {
+
+    const { assignmentId } = req.params;
+
+    // Find assignment belonging to logged in teacher
+    const assignment = await Assignment.findOne({
+      _id: assignmentId,
+      teacherId: req.userId,
+    });
+
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: "Assignment not found",
+      });
+    }
+
+    // Prevent duplicate generation
+    if (assignment.status === "generating") {
+      return res.status(400).json({
+        success: false,
+        message: "Assessment generation already in progress",
+      });
+    }
+
+    // Update status to generating
+    assignment.status = "generating";
+
+    await assignment.save();
+
+    // Generate questions using AI
+    const aiResponse = await generateQuestionsWithAI({
+      extractedText: assignment.extractedText,
+      questionConfig: assignment.questionConfig,
+    });
+
+    let parsedQuestions;
+
+    try {
+
+      // Remove markdown wrapping if Gemini adds it
+      const cleanedResponse = aiResponse
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      parsedQuestions = JSON.parse(cleanedResponse);
+
+    } catch (error) {
+
+      assignment.status = "failed";
+
+      await assignment.save();
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to parse AI response",
+      });
+
+    }
+
+    // Save generated questions
+    assignment.generatedQuestions = parsedQuestions;
+
+    assignment.status = "completed";
+
+    await assignment.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Assessment generated successfully",
+      generatedQuestions: parsedQuestions,
+    });
+
+  } catch (error) {
+
+    console.log("generateAssessment error:", error);
 
     return res.status(500).json({
       success: false,

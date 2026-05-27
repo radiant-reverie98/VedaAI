@@ -9,6 +9,9 @@ import AITeacher from '../components/dashboard/AITeacher'
 import Library from '../components/dashboard/Library'
 import MyGroups from '../components/dashboard/MyGroups'
 import CreateAssignment from '../components/dashboard/CreateAssignment'
+import { LogIn } from 'lucide-react'
+import Login from '../pages/Login'
+import Register from '../pages/Register'
 
 function AppRoutes() {
   return (
@@ -25,6 +28,8 @@ function AppRoutes() {
 
 
       </Route>
+      <Route path="/" element={<Login/>}/>
+      <Route path="/register" element={<Register/>}/>
 
     </Routes>
   )
