@@ -1,17 +1,22 @@
 import Assignment from "../model/assignment.model.js";
 
 import { uploadToCloudinary } from "../utils/cloudinary.utils.js";
-
+import { extractPdfText } from "../utils/extractedPdfText.js";
 
 
 
 // CREATE ASSIGNMENT
 export const createAssignment = async (req, res) => {
   try {
-    const { title, subject, description, questionConfig } = req.body;
-    
 
-    // 1. Validate required text fields first (before any I/O)
+    const {
+      title,
+      subject,
+      description,
+      questionConfig,
+    } = req.body;
+
+    // 1. Validate required fields
     if (!title || !subject || !questionConfig) {
       return res.status(400).json({
         success: false,
@@ -19,7 +24,7 @@ export const createAssignment = async (req, res) => {
       });
     }
 
-    // 2. Validate file
+    // 2. Validate PDF file
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -27,44 +32,65 @@ export const createAssignment = async (req, res) => {
       });
     }
 
-    // 3. Parse and validate questionConfig
+    // 3. Parse questionConfig
     let parsedQuestionConfig;
+
     try {
+
       parsedQuestionConfig = JSON.parse(questionConfig);
-    } catch {
+
+    } catch (error) {
+
       return res.status(400).json({
         success: false,
         message: "questionConfig must be valid JSON",
       });
+
     }
 
-    if (!Array.isArray(parsedQuestionConfig) || parsedQuestionConfig.length === 0) {
+    // 4. Validate questionConfig
+    if (
+      !Array.isArray(parsedQuestionConfig) ||
+      parsedQuestionConfig.length === 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "questionConfig must be a non-empty array",
       });
     }
 
-    // Optional: validate each item's shape
+    // 5. Validate each question config item
     const isValidConfig = parsedQuestionConfig.every(
-      (q) => q.type && typeof q.count === "number"  // adjust to your schema
+      (q) =>
+        q.type &&
+        typeof q.count === "number" &&
+        typeof q.marks === "number"
     );
+
     if (!isValidConfig) {
       return res.status(400).json({
         success: false,
-        message: "Each questionConfig item must have a valid type and count",
+        message:
+          "Each questionConfig item must contain type, count and marks",
       });
     }
 
-    // 4. Upload to Cloudinary only after all validation passes
-    const { secure_url: uploadedPdf } = await uploadToCloudinary(req.file.buffer);
+    // 6. Extract text from PDF
+    const extractedText = await extractPdfText(
+      req.file.buffer
+    );
+    
+    // 7. Upload PDF to Cloudinary
+    const { secure_url: uploadedPdf } =
+      await uploadToCloudinary(req.file.buffer);
 
-    // 5. Persist
+    // 8. Create assignment
     const assignment = await Assignment.create({
       title,
       subject,
       description,
       uploadedPdf,
+      extractedText,
       questionConfig: parsedQuestionConfig,
       teacherId: req.userId,
     });
@@ -76,11 +102,14 @@ export const createAssignment = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error("createAssignment error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
+
   }
 };
 

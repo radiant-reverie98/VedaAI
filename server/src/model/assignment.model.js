@@ -81,6 +81,9 @@ const assignmentSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    extractedText: {
+      type: String
+    },
   },
   {
     timestamps: true,
