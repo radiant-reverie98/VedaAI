@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, School, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import api from '../api.js';
-
+import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 export default function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', email: '', schoolName: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-
+  const {setUser} = useAuth();
   const handleSubmit = async(e) => {
     try{
       e.preventDefault();
       const response = await api.post('/auth/register',formData);
       if(response.data.success){
         alert("Registeration successful")
+        setUser(response.data.data.name)
       }
     }catch(error){
       console.log(`Error: ${error}`)

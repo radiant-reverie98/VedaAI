@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import api from '../api.js';
+import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-
+  const {setUser} = useAuth();
   const handleSubmit = async(e) => {
     try{
       e.preventDefault();
       const response = await api.post('/auth/login',formData);
       if(response.data.success){
         navigate('/dashboard/home')
+        setUser(response.data.data.name)
       }
     }catch(error){
       console.log(`$ERR : ${error}`)

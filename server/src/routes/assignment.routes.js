@@ -6,9 +6,10 @@ const router = express.Router();
 
 
 router.post('/create',verifyUser,upload.single("pdf"),createAssignment)
+router.get('/fetch-all',verifyUser,getMyAssignments)
 router.delete('/:assignmentId',verifyUser,deleteAssignment)
 router.get('/:assignmentId',verifyUser,getSingleAssignment)
-router.get('/fetch-all',verifyUser,getMyAssignments)
+
 router.post('/generate/:assignmentId',verifyUser,generateAssessment)
 
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Calendar, Plus, X, Mic, ArrowLeft, ArrowRight, ChevronDown, Heading, BookOpen, Loader2 } from 'lucide-react';
-import api from '../../api.js'; 
+import api from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 // Strict dictionary mapping to handle your Mongoose schema enum requirements

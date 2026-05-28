@@ -1,7 +1,8 @@
 import React from 'react';
 import { ArrowLeft, LayoutGrid, Bell, ChevronDown, Menu } from 'lucide-react';
-
+import { useAuth } from '../context/AuthContext';
 export default function Topbar({ onMenuToggle }) {
+  const {user} = useAuth();
   return (
     <div className="w-full bg-white border  border-gray-200/80 rounded-3xl p-3 flex items-center justify-between shadow-md">
       
@@ -49,7 +50,8 @@ export default function Topbar({ onMenuToggle }) {
           </div>
           {/* User Metadata Typography - Text label collapses cleanly on smaller screen viewports */}
           <span className="hidden sm:inline text-sm font-semibold text-gray-800 tracking-tight">
-            John Doe
+            {user?.name}
+            
           </span>
           <ChevronDown size={14} className="text-gray-400 stroke-[2.5] shrink-0" />
         </div>

@@ -10,7 +10,7 @@ import {
   LogOut, 
   Plus 
 } from 'lucide-react';
-import api from '../api.js';
+import api from '../utils/api';
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate()
