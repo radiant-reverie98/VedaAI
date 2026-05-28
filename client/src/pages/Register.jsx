@@ -7,14 +7,13 @@ export default function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', email: '', schoolName: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const {setUser} = useAuth();
+  const {fetchCurrentUser} = useAuth();
   const handleSubmit = async(e) => {
     try{
       e.preventDefault();
       const response = await api.post('/auth/register',formData);
       if(response.data.success){
-        alert("Registeration successful")
-        setUser(response.data.data.name)
+        await fetchCurrentUser();
       }
     }catch(error){
       console.log(`Error: ${error}`)

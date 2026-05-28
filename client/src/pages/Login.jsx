@@ -7,17 +7,18 @@ export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const {setUser} = useAuth();
+  const {fetchCurrentUser} = useAuth();
   const handleSubmit = async(e) => {
     try{
       e.preventDefault();
       const response = await api.post('/auth/login',formData);
       if(response.data.success){
         navigate('/dashboard/home')
-        setUser(response.data.data.name)
+        await fetchCurrentUser();
       }
+
     }catch(error){
-      console.log(`$ERR : ${error}`)
+      alert("Email or password is incorrect")
     }
   };
 

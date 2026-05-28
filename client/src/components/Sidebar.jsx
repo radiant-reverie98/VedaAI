@@ -11,14 +11,17 @@ import {
   Plus 
 } from 'lucide-react';
 import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate()
+  const {setUser,user} = useAuth()
   const handleLogout = async()=>{
     try{
       const response = await api.post(`/auth/logout`)
       if(response.data.success){
         navigate('/')
+        setUser(null)
       }
     }
     catch(error){
@@ -143,10 +146,17 @@ export default function Sidebar() {
             <div className="flex items-center gap-3">
               {/* Profile Avatar Placeholder */}
               <div className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center font-semibold text-sm">
-                JD
-              </div>
+  {user?.name
+    ? user.name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2) // Ensures you get a max of 2 letters (e.g., "JD")
+    : '??'}
+</div>
               <div>
-                <p className="text-sm font-semibold text-gray-900 leading-none">John Doe</p>
+                <p className="text-sm font-semibold text-gray-900 leading-none">{user?.name}</p>
                 <p className="text-xs text-gray-500 mt-1">Instructor</p>
               </div>
             </div>

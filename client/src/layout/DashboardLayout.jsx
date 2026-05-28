@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
+import { useAuth } from '../context/AuthContext';
 
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
 
   return (
     <div className="w-full min-h-screen bg-[#F9F9F9] flex relative overflow-x-hidden font-sans">
