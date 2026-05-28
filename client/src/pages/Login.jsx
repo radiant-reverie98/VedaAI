@@ -18,7 +18,7 @@ export default function Login() {
       }
 
     }catch(error){
-      alert("Email or password is incorrect")
+      alert(error)
     }
   };
 
