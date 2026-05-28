@@ -40,7 +40,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-  origin: ["http://localhost:5173","https://veda-ai-flax.vercel.app"],
+  origin: "https://veda-cpz35570q-radiant-reverie98s-projects.vercel.app",
 
   credentials: true
 }));
