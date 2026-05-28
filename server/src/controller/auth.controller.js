@@ -73,8 +73,8 @@ export const registerUser = async (req, res) => {
         // Set Cookie
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "None",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -150,8 +150,8 @@ export const loginUser = async (req, res) => {
         // Set Cookie
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // true in production
-            sameSite: "lax",
+            secure: true, // true in production
+            sameSite: "None",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -184,8 +184,8 @@ export const logoutUser = async (req, res) => {
 
         res.cookie("token", "", {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "None",
             expires: new Date(0),
         });
 
